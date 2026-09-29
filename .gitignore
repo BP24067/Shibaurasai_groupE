@@ -62,3 +62,17 @@ crashlytics-build.properties
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Blender backup
+*.blend1
+*.blend2
+
+# Unity crash / misc
+sysinfo.txt
+mono_crash.*
+*.unitypackage.meta
+/.utmp/
+
+# VS Code
+*.code-workspace
+.history/
