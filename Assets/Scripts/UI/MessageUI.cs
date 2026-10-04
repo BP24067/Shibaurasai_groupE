@@ -46,21 +46,21 @@ public class MessageUI : MonoBehaviour
     /// <param name="newState">変更後の新しい状態</param>
     
     //↓状態が変わった時に実行する処理名
-    private void OnStateChangedHandler(GameManager.State newState)
+    private void OnStateChangedHandler(GameState newState)
     {
         if(messageText == null) return;
 
         switch(newState)
         {
-            case GameManager.State.Ready:
+            case GameState.Ready:
                 messageText.text = "声を出してスタート!!";
                 break;
 
-            case GameManager.State.Playing:
+            case GameState.Playing:
                 messageText.text = ""; //プレイ中はメッセージを消す
                 break;
 
-            case GameManager.State.Goal:
+            case GameState.Goal:
                 messageText.text = "GOAL!! クリアおめでとう!";
                 break;
 
