@@ -7,14 +7,14 @@ public class MessageUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI messageText;
 
     [Header("GameManager参照")]
-    [SerializeField] private GameManger gameManager;
+    [SerializeField] private GameManager gameManager;
 
     private void OnEnable()
     {
-        //gamemanagerのイベントに状態が変わったら通知
-        if(gameManeger != null)
+        //gameManagerのイベントに状態が変わったら通知
+        if(gameManager != null)
         {
-            gameManeger.OnStateChanged += OnStateChangedHandler;
+            gameManager.OnStateChanged += OnStateChangedHandler;
         }
     }
 
@@ -27,16 +27,28 @@ public class MessageUI : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        // 登録より前に状態が決まっていた場合に備え、今の状態で一度表示する
+        if (gameManager != null) OnStateChangedHandler(gameManager.State);
+    }
+
+    /// <summary>他のスクリプト（SilentZone など）から一時的にメッセージを出す</summary>
+    public void Show(string message)
+    {
+        if (messageText != null) messageText.text = message;
+    }
+
 
     /// <summary>
-    /// GameManegerの状態(State)が変わった時に自動的に呼び出されるメソッド
+    /// GameManagerの状態(State)が変わった時に自動的に呼び出されるメソッド
     /// </summary>
     /// <param name="newState">変更後の新しい状態</param>
     
     //↓状態が変わった時に実行する処理名
     private void OnStateChangedHandler(GameManager.State newState)
     {
-        if(messagetext == null) return;
+        if(messageText == null) return;
 
         switch(newState)
         {
