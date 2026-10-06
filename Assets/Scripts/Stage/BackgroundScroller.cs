@@ -13,10 +13,10 @@ public class BackgroundScroller : MonoBehaviour
     [SerializeField] Renderer targetRenderer; //スクロールさせるQuad,ImageのRenderer
 
     [Header("スクロール設定")]
-    [Toolip("スクロール速度の倍率（奥のレイヤーは小さく、手前のレイヤーは大きく設定）")]
+    [Tooltip("スクロール速度の倍率（奥のレイヤーは小さく、手前のレイヤーは大きく設定）")]
     [SerializeField] float scrollSpeedMultiplier = 0.1f;
 
-    [Toolip("スクロールさせる方向（Y:-1で上から下、1で下から上）")]
+    [Toolitp("スクロールさせる方向（Y:-1で上から下、1で下から上）")]
     [SerializeField] Vector2 scrollDirection = new Vector2(0f, -1f);
 
     Material material;
