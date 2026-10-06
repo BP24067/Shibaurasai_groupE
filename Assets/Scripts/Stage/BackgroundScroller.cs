@@ -16,7 +16,7 @@ public class BackgroundScroller : MonoBehaviour
     [Tooltip("スクロール速度の倍率（奥のレイヤーは小さく、手前のレイヤーは大きく設定）")]
     [SerializeField] float scrollSpeedMultiplier = 0.1f;
 
-    [Toolitp("スクロールさせる方向（Y:-1で上から下、1で下から上）")]
+    [Tooltip("スクロールさせる方向（Y:-1で上から下、1で下から上）")]
     [SerializeField] Vector2 scrollDirection = new Vector2(0f, -1f);
 
     Material material;
