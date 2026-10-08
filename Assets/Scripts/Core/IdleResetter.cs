@@ -58,7 +58,7 @@ public class IdleResetter : MonoBehaviour
         }
 
         //2.キーボード・マウス操作の検知（デバッグや汎用入力用）
-        if(includeanyInput)
+        if(includeAnyInput)
         {
             //Input System（キーボード・マウス）の入力チェック
             if(Keyboard.current != null && Keyboard.current.anyKey.isPressed)
