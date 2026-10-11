@@ -46,6 +46,12 @@ public class GameManager : MonoBehaviour
 
     public bool IsCalibrating => calibration != null && calibration.IsCalibrating;
 
+    /// <summary>
+    /// true の間は声の大きさで速度を変えず、今の速度を保つ（SilentZone 用）。
+    /// この間、速度は Brake() でだけ下がる。ResetToReady() で false に戻る。
+    /// </summary>
+    public bool HoldSpeed { get; set; }
+
     public event Action<GameState> OnStateChanged;
     public event Action OnHit;
 
@@ -86,8 +92,11 @@ public class GameManager : MonoBehaviour
 
     void UpdatePlaying()
     {
-        float targetSpeed = Mathf.Lerp(minSpeed, maxSpeed, Level);
-        Speed = Mathf.MoveTowards(Speed, targetSpeed, accel * Time.deltaTime);
+        if (!HoldSpeed)
+        {
+            float targetSpeed = Mathf.Lerp(minSpeed, maxSpeed, Level);
+            Speed = Mathf.MoveTowards(Speed, targetSpeed, accel * Time.deltaTime);
+        }
         Distance += Speed * Time.deltaTime;
         ElapsedTime += Time.deltaTime;
 
@@ -105,6 +114,7 @@ public class GameManager : MonoBehaviour
         Distance = 0f;
         ElapsedTime = 0f;
         startHoldTimer = 0f;
+        HoldSpeed = false;
         if (calibration != null) calibration.StartCalibration();
         SetState(GameState.Ready, force: true);
     }
@@ -115,6 +125,13 @@ public class GameManager : MonoBehaviour
         if (State != GameState.Playing) return;
         Speed *= hitSlowdown;
         OnHit?.Invoke();
+    }
+
+    /// <summary>速度を毎秒 amountPerSecond ずつ下げる（minSpeed より下がらない）。SilentZone が毎フレーム呼ぶ。</summary>
+    public void Brake(float amountPerSecond)
+    {
+        if (State != GameState.Playing) return;
+        Speed = Mathf.Max(minSpeed, Speed - amountPerSecond * Time.deltaTime);
     }
 
     void SetState(GameState next, bool force = false)
