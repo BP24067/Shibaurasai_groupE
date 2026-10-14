@@ -13,6 +13,9 @@ public class ResultUI : MonoBehaviour
     [SerializeField] MicInput mic;  //発生検知用
     [SerializeField] GameObject resultPanel;//結果画面全体の親オブジェクト
     [SerializeField] TextMeshProUGUI clearTimeText;//クリアタイム表示用テキスト
+    [SerializeField] Effects.WarpSequence warpSequence;//ワープ演出（終わってから結果を表示する）
+    [SerializeField] BestRecord bestRecord;//ベスト記録の保存
+    [SerializeField] TextMeshProUGUI bestTimeText;//ベスト記録表示用テキスト
 
     [Header("設定")]
     [Tooltip("ゴール後に自動でReadyに戻るまでの待ち時間(秒)")]
@@ -48,6 +51,12 @@ public class ResultUI : MonoBehaviour
         {
             Debug.LogError("[ResultUI] GameManagerが設定されていません。");
         }
+
+        //ワープ演出が終わったら結果を表示する
+        if(warpSequence != null)
+        {
+            warpSequence.OnFinished += OnWarpFinished;
+        }
     }
 
     void OnDestroy()
@@ -56,6 +65,10 @@ public class ResultUI : MonoBehaviour
         if(gameManager != null)
         {
             gameManager.OnStateChanged -= OnGameStateChanged;
+        }
+        if(warpSequence != null)
+        {
+            warpSequence.OnFinished -= OnWarpFinished;
         }
     }
 
@@ -90,11 +103,27 @@ public class ResultUI : MonoBehaviour
     {
         if(state == GameState.Goal)
         {
-            ShowResult();
+            //ワープ演出がある場合は、演出が終わってから OnWarpFinished で表示する
+            if(warpSequence == null)
+            {
+                ShowResult();
+            }
         }
         else if(state == GameState.Ready)
         {
             HideResult();
+        }
+    }
+
+    /// <summary>
+    /// ワープ演出（WarpSequence）が終わった時に呼ばれる
+    /// </summary>
+    void OnWarpFinished()
+    {
+        //演出中にReadyへ戻っていた場合は表示しない
+        if(gameManager != null && gameManager.State == GameState.Goal)
+        {
+            ShowResult();
         }
     }
 
@@ -118,6 +147,16 @@ public class ResultUI : MonoBehaviour
             int minutes = Mathf.FloorToInt(time /60f);
             float seconds = time % 60f;
             clearTimeText.text = $"TIME: {minutes:00}:{seconds:00.00}";
+        }
+
+        //ベスト記録の更新と表示（ShowResultはゴール1回につき1回だけ呼ばれる）
+        if(bestRecord != null && bestTimeText != null && gameManager != null)
+        {
+            bool isNew = bestRecord.Submit(gameManager.ElapsedTime);
+            float best = bestRecord.BestTime;
+            bestTimeText.text = isNew
+                ? "NEW RECORD!"
+                : $"BEST: {Mathf.FloorToInt(best / 60f):00}:{best % 60f:00.00}";
         }
     }
 

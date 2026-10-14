@@ -9732,6 +9732,7 @@ GameObject:
   - component: {fileID: 4004514591696183041}
   - component: {fileID: 550694088969887669}
   - component: {fileID: 1216290664032991136}
+  - component: {fileID: 7311016314754229827}
   m_Layer: 0
   m_Name: Ship
   m_TagString: Untagged
@@ -9821,6 +9822,28 @@ MonoBehaviour:
   meteorTag: Meteor
   invincibleTime: 0.5
   despawnMeteorOnHit: 1
+--- !u!114 &7311016314754229827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4787020681991177258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b23fb6ce3e8a0d499f59c4ec9784c0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShipMover
+  gameManager: {fileID: 0}
+  mic: {fileID: 0}
+  visual: {fileID: 2790465867886654925}
+  minY: -2
+  maxY: 2.8
+  restY: 0
+  smoothTime: 0.25
+  maxVerticalSpeed: 8
+  tiltPerSpeed: 4
+  maxTilt: 20
 --- !u!1001 &2392256451503526438
 PrefabInstance:
   m_ObjectHideFlags: 0

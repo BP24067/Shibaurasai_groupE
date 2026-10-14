@@ -45,6 +45,11 @@ namespace Effects
         private Vector3 originalShipLocalPos;
         private Coroutine sequenceCoroutine;
 
+        /// <summary>
+        /// ワープ演出が最後まで終わった時に通知する（ResultUI が結果画面を出すために使う）
+        /// </summary>
+        public event System.Action OnFinished;
+
         private void Awake()
         {
             if (mainCamera != null)
@@ -197,6 +202,9 @@ namespace Effects
             }
 
             sequenceCoroutine = null;
+
+            // 演出の完了を通知（途中で ResetSequence された場合はここまで来ないので通知されない）
+            OnFinished?.Invoke();
         }
 
         /// <summary>

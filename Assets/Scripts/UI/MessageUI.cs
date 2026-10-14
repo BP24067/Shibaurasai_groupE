@@ -9,6 +9,23 @@ public class MessageUI : MonoBehaviour
     [Header("GameManager参照")]
     [SerializeField] private GameManager gameManager;
 
+    bool wasCalibrating;
+
+    private void Update()
+    {
+        //Ready中だけ、マイクのキャリブレーション中かどうかで文言を切り替える
+        if(gameManager == null || messageText == null) return;
+        if(gameManager.State != GameState.Ready) return;
+
+        bool calibrating = gameManager.IsCalibrating;
+        if(calibrating == wasCalibrating) return; //変わったときだけ書き換える
+        wasCalibrating = calibrating;
+
+        messageText.text = calibrating
+            ? "マイク調整中… 静かにしてください"
+            : "声を出してスタート!!";
+    }
+
     private void OnEnable()
     {
         //gameManagerのイベントに状態が変わったら通知

@@ -28,6 +28,8 @@ public class MeteorSpawner : MonoBehaviour
     [SerializeField] float rangeY = 3f;
     [Tooltip("宇宙船の正面付近に出す確率（0〜1）。大きいほど当たりやすい")]
     [SerializeField, Range(0f, 1f)] float centerBias = 0.25f;
+    [Tooltip("「正面付近」の隕石が狙う対象（通常は Ship）。空なら MeteorSpawner の位置を狙う")]
+    [SerializeField] Transform aimTarget;
     [Tooltip("「正面付近」とみなす半径")]
     [SerializeField] float centerRadius = 1.5f;
 
@@ -108,10 +110,19 @@ public class MeteorSpawner : MonoBehaviour
     {
         if (pool == null || pool.Prefab == null) return;
 
-        Vector2 offset = Random.value < centerBias
-            ? Random.insideUnitCircle * centerRadius
-            : new Vector2(Random.Range(-rangeX, rangeX), Random.Range(-rangeY, rangeY));
-        var position = new Vector3(transform.position.x + offset.x, transform.position.y + offset.y, z);
+        // 「正面付近」の隕石は、生成した瞬間の宇宙船の位置を狙う（宇宙船が上下に動くので、よける意味が出る）
+        Vector2 position2D;
+        if (Random.value < centerBias)
+        {
+            Vector3 aim = aimTarget != null ? aimTarget.position : transform.position;
+            position2D = new Vector2(aim.x, aim.y) + Random.insideUnitCircle * centerRadius;
+        }
+        else
+        {
+            position2D = new Vector2(transform.position.x + Random.Range(-rangeX, rangeX),
+                                     transform.position.y + Random.Range(-rangeY, rangeY));
+        }
+        var position = new Vector3(position2D.x, position2D.y, z);
 
         Meteor meteor = pool.Get(position, Random.rotation);
         meteor.transform.localScale = pool.Prefab.transform.localScale * Random.Range(minScale, maxScale);
