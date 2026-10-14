@@ -3,7 +3,32 @@ guid: d1cd98a11c73eed4ba6618d2993530fb
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Accent_Emission
+    second: {fileID: 2100000, guid: b063e5afd2e872342b28cdeba5106c3f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Armor_DarkGray
+    second: {fileID: 2100000, guid: 03eea99fc85a7864cbe351343f4aec3e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Cockpit_Glass
+    second: {fileID: 2100000, guid: b9659ab113ac20a4b8ee05633ce976f4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Engine_Glow
+    second: {fileID: 2100000, guid: 7ca44755782ca6c4e84e4a0dc08e84be, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Hull_White
+    second: {fileID: 2100000, guid: 2c31aaf6156432f4a9a40e91b7cef751, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -3,7 +3,27 @@ guid: 227d12a2c68383e46b598c5bda02cca7
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Gate_Armor
+    second: {fileID: 2100000, guid: 2fb9b4257a6d87c438006403eb67e379, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Gate_Glow
+    second: {fileID: 2100000, guid: f772a3b4e58e1394b8c97d399bdab294, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Gate_Metal
+    second: {fileID: 2100000, guid: 984bd540ce2c0304aa0f7692490647ac, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Gate_White
+    second: {fileID: 2100000, guid: baa844f794f40f94490d808b47c33765, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
