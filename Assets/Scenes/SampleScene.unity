@@ -1313,7 +1313,7 @@ MonoBehaviour:
   maxSpeed: 40
   accel: 30
   hitSlowdown: 0.5
-  goalDistance: 200
+  goalDistance: 1000
   startThreshold: 0.5
   startHoldTime: 0.3
 --- !u!1 &598576645
