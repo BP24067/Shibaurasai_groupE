@@ -9,6 +9,9 @@ public class MessageUI : MonoBehaviour
     [Header("GameManager参照")]
     [SerializeField] private GameManager gameManager;
 
+    //Ready中のメッセージ（2行目は操作説明。<size> で小さく表示する）
+    const string ReadyText = "声を出してスタート!!\n<size=55%>大きな声で上へ ・ 「いー」で右 ・ 「おー」で左</size>";
+
     bool wasCalibrating;
 
     private void Update()
@@ -23,7 +26,7 @@ public class MessageUI : MonoBehaviour
 
         messageText.text = calibrating
             ? "マイク調整中… 静かにしてください"
-            : "声を出してスタート!!";
+            : ReadyText;
     }
 
     private void OnEnable()
@@ -70,7 +73,7 @@ public class MessageUI : MonoBehaviour
         switch(newState)
         {
             case GameState.Ready:
-                messageText.text = "声を出してスタート!!";
+                messageText.text = ReadyText;
                 break;
 
             case GameState.Playing:

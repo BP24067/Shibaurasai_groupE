@@ -12,6 +12,9 @@ using UnityEngine.InputSystem;
 ///   Shift + ↑ / ↓  最大音量（MaxDb）を上げる／下げる
 ///   C              キャリブレーションをやり直す
 ///   D              次のマイクに切り替える
+///   I（押している間）「いー」と言う → 右側の音色として記録
+///   O（押している間）「おー」と言う → 左側の音色として記録
+///                  両方そろうと、音色の中心（TimbreCenterDb）と幅（TimbreRangeDb）を自動で合わせる
 ///
 /// ※ TextMeshPro の標準フォントは日本語を表示できないため、画面の文字は英語にしている。
 /// </summary>
@@ -26,6 +29,11 @@ public class DebugPanel : MonoBehaviour
     [SerializeField] int barLength = 30;
 
     readonly StringBuilder sb = new StringBuilder();
+
+    // 音色の記録（キーを押している間の平均）
+    float capturedHighDb = float.NaN, capturedLowDb = float.NaN;
+    double captureSum;
+    int captureCount;
 
     void Start()
     {
@@ -51,8 +59,34 @@ public class DebugPanel : MonoBehaviour
         }
         if (keyboard.cKey.wasPressedThisFrame && calibration != null) calibration.StartCalibration();
         if (keyboard.dKey.wasPressedThisFrame && deviceSelector != null) deviceSelector.SelectNext();
+        UpdateTimbreCapture(keyboard.iKey.isPressed, keyboard.iKey.wasReleasedThisFrame, true);
+        UpdateTimbreCapture(keyboard.oKey.isPressed, keyboard.oKey.wasReleasedThisFrame, false);
 
         if (infoText != null) infoText.text = BuildText();
+    }
+
+    // キーを押している間の音色を平均し、離したときに記録する。両方そろったら中心と幅を合わせる
+    void UpdateTimbreCapture(bool held, bool released, bool high)
+    {
+        if (held && mic.IsVoiced && !float.IsNaN(mic.TimbreDb))
+        {
+            captureSum += mic.TimbreDb;
+            captureCount++;
+        }
+        if (!released) return;
+
+        if (captureCount > 0)
+        {
+            float average = (float)(captureSum / captureCount);
+            if (high) capturedHighDb = average; else capturedLowDb = average;
+            if (!float.IsNaN(capturedHighDb) && !float.IsNaN(capturedLowDb) && capturedHighDb > capturedLowDb)
+            {
+                mic.TimbreCenterDb = (capturedHighDb + capturedLowDb) / 2f;
+                mic.TimbreRangeDb = (capturedHighDb - capturedLowDb) / 2f;
+            }
+        }
+        captureSum = 0;
+        captureCount = 0;
     }
 
     string BuildText()
@@ -78,7 +112,18 @@ public class DebugPanel : MonoBehaviour
                 sb.AppendLine("Calib  : not yet");
         }
 
-        sb.Append("[C] Recalibrate   [D] Next device");
+        // 音色（左右）
+        string raw = float.IsNaN(mic.TimbreDb) ? "  --  " : $"{mic.TimbreDb,6:F1}";
+        int half = barLength / 2;
+        int pos = Mathf.Clamp(Mathf.RoundToInt((mic.Timbre + 1f) * 0.5f * barLength), 0, barLength);
+        var bar = new char[barLength + 1];
+        for (int i = 0; i <= barLength; i++) bar[i] = i == pos ? '#' : i == half ? '|' : '.';
+        sb.AppendLine($"Timbre : {raw} dB -> {mic.Timbre:+0.00;-0.00} [{new string(bar)}]");
+        string fmt(float v) => float.IsNaN(v) ? "--" : v.ToString("F1");
+        sb.AppendLine($"         center {mic.TimbreCenterDb:F1}  range {mic.TimbreRangeDb:F1}   oo:{fmt(capturedLowDb)}  ii:{fmt(capturedHighDb)}");
+
+        sb.AppendLine("[C] Recalibrate   [D] Next device");
+        sb.Append("[I] hold + say \"ii-\" (right)   [O] hold + say \"oo-\" (left)");
         return sb.ToString();
     }
 }
