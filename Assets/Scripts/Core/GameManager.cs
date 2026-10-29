@@ -24,7 +24,9 @@ public class GameManager : MonoBehaviour
     [Tooltip("1秒あたりに変化できる速度の量（大きいほど反応が速い）")]
     [SerializeField] float accel = 30f;
     [Tooltip("隕石に当たったときに速度に掛ける倍率")]
-    [SerializeField, Range(0f, 1f)] float hitSlowdown = 0.5f;
+    [SerializeField, Range(0f, 1f)] float hitSlowdown = 0.3f;
+    [Tooltip("隕石に当たってから、この秒数は加速できない（減速を感じやすくする）")]
+    [SerializeField] float hitRecoveryTime = 1f;
 
     [Header("進行")]
     [SerializeField] float goalDistance = 1500f;
@@ -56,6 +58,7 @@ public class GameManager : MonoBehaviour
     public event Action OnHit;
 
     float startHoldTimer;
+    float hitRecoveryTimer;
 
     float Level => mic != null ? mic.Level : 0f;
 
@@ -92,9 +95,13 @@ public class GameManager : MonoBehaviour
 
     void UpdatePlaying()
     {
+        if (hitRecoveryTimer > 0f) hitRecoveryTimer -= Time.deltaTime;
+
         if (!HoldSpeed)
         {
             float targetSpeed = Mathf.Lerp(minSpeed, maxSpeed, Level);
+            // 当たった直後は加速させない（声を小さくしたときの減速はそのまま）
+            if (hitRecoveryTimer > 0f) targetSpeed = Mathf.Min(targetSpeed, Speed);
             Speed = Mathf.MoveTowards(Speed, targetSpeed, accel * Time.deltaTime);
         }
         Distance += Speed * Time.deltaTime;
@@ -114,6 +121,7 @@ public class GameManager : MonoBehaviour
         Distance = 0f;
         ElapsedTime = 0f;
         startHoldTimer = 0f;
+        hitRecoveryTimer = 0f;
         HoldSpeed = false;
         if (calibration != null) calibration.StartCalibration();
         SetState(GameState.Ready, force: true);
@@ -124,6 +132,7 @@ public class GameManager : MonoBehaviour
     {
         if (State != GameState.Playing) return;
         Speed *= hitSlowdown;
+        hitRecoveryTimer = hitRecoveryTime;
         OnHit?.Invoke();
     }
 
