@@ -54,10 +54,11 @@ public class MeteorSpawner : MonoBehaviour
     [Tooltip("種類ごとの見た目と出やすさ。weight の比率で抽選する")]
     [SerializeField] List<MeteorVariant> variants = new List<MeteorVariant>
     {
-        new MeteorVariant { kind = MeteorKind.Normal, weight = 65f, scale = 1f },
+        new MeteorVariant { kind = MeteorKind.Normal, weight = 57f, scale = 1f },
         new MeteorVariant { kind = MeteorKind.Red, weight = 12f, scale = 1.3f },
         new MeteorVariant { kind = MeteorKind.Gold, weight = 13f, scale = 0.7f },
         new MeteorVariant { kind = MeteorKind.Purple, weight = 10f, scale = 1f },
+        new MeteorVariant { kind = MeteorKind.Clock, weight = 8f, scale = 0.8f },
     };
 
     [System.Serializable]

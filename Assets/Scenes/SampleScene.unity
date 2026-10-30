@@ -377,7 +377,7 @@ MonoBehaviour:
   variants:
   - kind: 0
     material: {fileID: 0}
-    weight: 65
+    weight: 57
     scale: 1
   - kind: 1
     material: {fileID: 2100000, guid: 22b403f51dc90c84ea880f2c4bf2c73a, type: 2}
@@ -391,6 +391,10 @@ MonoBehaviour:
     material: {fileID: 2100000, guid: 360d6864aa85fa747827acf6fec169dc, type: 2}
     weight: 10
     scale: 1
+  - kind: 4
+    material: {fileID: 2100000, guid: 3dbb354352d018a4885105495f9d3d32, type: 2}
+    weight: 8
+    scale: 0.8
 --- !u!114 &208314586
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1336,6 +1340,7 @@ MonoBehaviour:
   boostSpeedMultiplier: 1.5
   boostTime: 1.5
   reverseTime: 3
+  clockTimeBonus: 2
   goalDistance: 1000
   startThreshold: 0.5
   startHoldTime: 0.3
@@ -2194,6 +2199,7 @@ MonoBehaviour:
   goldColor: {r: 1, g: 0.82, b: 0.25, a: 1}
   redColor: {r: 1, g: 0.3, b: 0.25, a: 1}
   purpleColor: {r: 0.8, g: 0.45, b: 1, a: 1}
+  clockColor: {r: 0.3, g: 0.9, b: 1, a: 1}
 --- !u!114 &1163986190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7917,7 +7923,11 @@ MonoBehaviour:
   mic: {fileID: 1947826977}
   duration: 2
   marginDb: 6
+  spreadFactor: 2
   warmup: 0.5
+  voiceDb: 10
+  maxVoiceRatio: 0.2
+  maxRetries: 2
   minFloorDb: -70
   calibrateOnStart: 0
 --- !u!4 &1947826981

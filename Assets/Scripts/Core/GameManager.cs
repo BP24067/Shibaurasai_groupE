@@ -9,8 +9,8 @@ using UnityEngine;
 ///
 /// 他のスクリプトへの通知:
 ///   OnStateChanged … 状態が変わったとき（MessageUI, AudioManager, WarpGate, WarpSequence, ResultUI など）
-///   OnHit          … 隕石に当たったとき（CameraShake, HitEffect, AudioManager など）。金の隕石では呼ばない
-///   OnMeteorHit    … 隕石に当たったとき、その種類（色）と一緒に（MeteorEffectUI など）。金の隕石でも呼ぶ
+///   OnHit          … 隕石に当たったとき（CameraShake, HitEffect, AudioManager など）。金・時計の隕石では呼ばない
+///   OnMeteorHit    … 隕石に当たったとき、その種類（色）と一緒に（MeteorEffectUI など）。金・時計の隕石でも呼ぶ
 /// </summary>
 public class GameManager : MonoBehaviour
 {
@@ -40,6 +40,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] float boostTime = 1.5f;
     [Tooltip("紫：左右の操作が逆になる秒数")]
     [SerializeField] float reverseTime = 3f;
+    [Tooltip("時計：クリアタイムから引く秒数")]
+    [SerializeField] float clockTimeBonus = 2f;
 
     [Header("進行")]
     [SerializeField] float goalDistance = 1500f;
@@ -72,6 +74,9 @@ public class GameManager : MonoBehaviour
 
     /// <summary>左右が逆になっている残り秒数。</summary>
     public float ReverseTimeLeft => Mathf.Max(0f, reverseTimer);
+
+    /// <summary>時計の隕石を取ったときに、クリアタイムから引く秒数。</summary>
+    public float ClockTimeBonus => clockTimeBonus;
 
     /// <summary>金の隕石を取って、ブースト中か。</summary>
     public bool IsBoosting => boostTimer > 0f;
@@ -169,6 +174,12 @@ public class GameManager : MonoBehaviour
                 boostTimer = boostTime;
                 hitRecoveryTimer = 0f;
                 Speed = Mathf.Max(Speed, maxSpeed * boostSpeedMultiplier);
+                OnMeteorHit?.Invoke(kind);
+                return;
+
+            case MeteorKind.Clock:
+                // クリアタイムを短くする（0 秒より短くはしない）。良い隕石なので OnHit は出さない
+                ElapsedTime = Mathf.Max(0f, ElapsedTime - clockTimeBonus);
                 OnMeteorHit?.Invoke(kind);
                 return;
 

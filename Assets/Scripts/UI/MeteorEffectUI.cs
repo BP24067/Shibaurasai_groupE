@@ -6,6 +6,7 @@ using UnityEngine;
 ///   金 … 「BOOST!!」（あわせて pickupSe を鳴らす）
 ///   赤 … 「大減速!!」
 ///   紫 … 「左右反転!!」と残り秒数（左右が逆の間ずっと表示）
+///   時計 … 「TIME -2秒!!」（あわせて pickupSe を鳴らす）
 ///   灰 … 何も表示しない（今までどおり）
 /// Playing 以外になったら消す。
 ///
@@ -15,7 +16,7 @@ public class MeteorEffectUI : MonoBehaviour
 {
     [SerializeField] GameManager gameManager;
     [SerializeField] TextMeshProUGUI text;
-    [Tooltip("金の隕石を取ったときに鳴らす（空なら鳴らさない）")]
+    [Tooltip("金・時計の隕石を取ったときに鳴らす（空なら鳴らさない）")]
     [SerializeField] Effects.AudioManager audioManager;
     [SerializeField] AudioClip pickupSe;
     [Tooltip("表示しておく秒数（紫は左右が逆の間ずっと表示）")]
@@ -25,6 +26,7 @@ public class MeteorEffectUI : MonoBehaviour
     [SerializeField] Color goldColor = new Color(1f, 0.82f, 0.25f);
     [SerializeField] Color redColor = new Color(1f, 0.3f, 0.25f);
     [SerializeField] Color purpleColor = new Color(0.8f, 0.45f, 1f);
+    [SerializeField] Color clockColor = new Color(0.3f, 0.9f, 1f);
 
     float hideTimer;
 
@@ -77,6 +79,11 @@ public class MeteorEffectUI : MonoBehaviour
         {
             case MeteorKind.Gold:
                 Show("BOOST!!", goldColor);
+                hideTimer = showTime;
+                if (audioManager != null) audioManager.PlaySe(pickupSe);
+                break;
+            case MeteorKind.Clock:
+                Show($"TIME -{gameManager.ClockTimeBonus:0.#}秒!!", clockColor);
                 hideTimer = showTime;
                 if (audioManager != null) audioManager.PlaySe(pickupSe);
                 break;
