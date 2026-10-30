@@ -19,13 +19,43 @@ public class Meteor : MonoBehaviour
     GameManager gameManager;
     MeteorSpawner spawner;
     Vector3 spinAxis;
+    Renderer[] renderers;
+    Material[][] originalMaterials;
 
-    /// <summary>MeteorSpawner が生成直後に呼ぶ。</summary>
-    public void Init(GameManager gameManager, MeteorSpawner spawner)
+    /// <summary>この隕石の種類（色）。ShipCollision が当たったときに GameManager へ伝える。</summary>
+    public MeteorKind Kind { get; private set; }
+
+    void Awake()
+    {
+        // 種類ごとにマテリアルを差し替えるので、元のマテリアルを覚えておく
+        renderers = GetComponentsInChildren<Renderer>(true);
+        originalMaterials = new Material[renderers.Length][];
+        for (int i = 0; i < renderers.Length; i++) originalMaterials[i] = renderers[i].sharedMaterials;
+    }
+
+    /// <summary>MeteorSpawner が生成直後に呼ぶ。material が null なら Prefab 元のマテリアルに戻す。</summary>
+    public void Init(GameManager gameManager, MeteorSpawner spawner, MeteorKind kind = MeteorKind.Normal, Material material = null)
     {
         this.gameManager = gameManager;
         this.spawner = spawner;
+        Kind = kind;
         spinAxis = Random.onUnitSphere;
+        SetMaterial(material);
+    }
+
+    void SetMaterial(Material material)
+    {
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (material == null)
+            {
+                renderers[i].sharedMaterials = originalMaterials[i];
+                continue;
+            }
+            var materials = new Material[originalMaterials[i].Length];
+            for (int j = 0; j < materials.Length; j++) materials[j] = material;
+            renderers[i].sharedMaterials = materials;
+        }
     }
 
     void Update()

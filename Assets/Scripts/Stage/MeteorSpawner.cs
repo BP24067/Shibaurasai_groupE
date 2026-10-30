@@ -50,6 +50,28 @@ public class MeteorSpawner : MonoBehaviour
     [SerializeField] float minScale = 0.6f;
     [SerializeField] float maxScale = 1.6f;
 
+    [Header("隕石の種類（色）")]
+    [Tooltip("種類ごとの見た目と出やすさ。weight の比率で抽選する")]
+    [SerializeField] List<MeteorVariant> variants = new List<MeteorVariant>
+    {
+        new MeteorVariant { kind = MeteorKind.Normal, weight = 65f, scale = 1f },
+        new MeteorVariant { kind = MeteorKind.Red, weight = 12f, scale = 1.3f },
+        new MeteorVariant { kind = MeteorKind.Gold, weight = 13f, scale = 0.7f },
+        new MeteorVariant { kind = MeteorKind.Purple, weight = 10f, scale = 1f },
+    };
+
+    [System.Serializable]
+    public class MeteorVariant
+    {
+        public MeteorKind kind;
+        [Tooltip("この種類の見た目。空なら Prefab 元のマテリアルのまま")]
+        public Material material;
+        [Tooltip("出やすさ（ほかの種類との比率）")]
+        public float weight = 1f;
+        [Tooltip("大きさに掛ける倍率（色以外でも見分けられるように）")]
+        public float scale = 1f;
+    }
+
     const float MinSpawnInterval = 0.5f;  // 間隔が 0 以下になって無限ループしないための下限
 
     readonly List<Meteor> activeMeteors = new List<Meteor>();
@@ -124,10 +146,30 @@ public class MeteorSpawner : MonoBehaviour
         }
         var position = new Vector3(position2D.x, position2D.y, z);
 
+        MeteorVariant variant = PickVariant();
+        float scale = Random.Range(minScale, maxScale) * (variant != null ? variant.scale : 1f);
+
         Meteor meteor = pool.Get(position, Random.rotation);
-        meteor.transform.localScale = pool.Prefab.transform.localScale * Random.Range(minScale, maxScale);
-        meteor.Init(gameManager, this);
+        meteor.transform.localScale = pool.Prefab.transform.localScale * scale;
+        if (variant != null) meteor.Init(gameManager, this, variant.kind, variant.material);
+        else meteor.Init(gameManager, this);
         activeMeteors.Add(meteor);
+    }
+
+    // weight の比率で種類を 1 つ選ぶ。種類が設定されていなければ null（ふつうの隕石になる）
+    MeteorVariant PickVariant()
+    {
+        float total = 0f;
+        foreach (var variant in variants) total += Mathf.Max(0f, variant.weight);
+        if (total <= 0f) return null;
+
+        float pick = Random.value * total;
+        foreach (var variant in variants)
+        {
+            pick -= Mathf.Max(0f, variant.weight);
+            if (pick < 0f) return variant;
+        }
+        return variants[variants.Count - 1];
     }
 
     /// <summary>隕石を回収してプールに返す（Meteor.Despawn() から呼ばれる）。</summary>

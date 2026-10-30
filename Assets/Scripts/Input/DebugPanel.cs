@@ -11,7 +11,7 @@ using UnityEngine.InputSystem;
 ///   ↑ / ↓          しきい値（NoiseFloorDb）を上げる／下げる
 ///   Shift + ↑ / ↓  最大音量（MaxDb）を上げる／下げる
 ///   C              キャリブレーションをやり直す
-///   D              次のマイクに切り替える
+///   D              次のマイクに切り替える（切り替えたあと、キャリブレーションをやり直す）
 ///   I（押している間）「いー」と言う → 右側の音色として記録
 ///   O（押している間）「おー」と言う → 左側の音色として記録
 ///                  両方そろうと、音色の中心（TimbreCenterDb）と幅（TimbreRangeDb）を自動で合わせる
@@ -58,7 +58,11 @@ public class DebugPanel : MonoBehaviour
             if (shift) mic.MaxDb -= stepDb; else mic.NoiseFloorDb -= stepDb;
         }
         if (keyboard.cKey.wasPressedThisFrame && calibration != null) calibration.StartCalibration();
-        if (keyboard.dKey.wasPressedThisFrame && deviceSelector != null) deviceSelector.SelectNext();
+        if (keyboard.dKey.wasPressedThisFrame && deviceSelector != null)
+        {
+            deviceSelector.SelectNext();
+            if (calibration != null) calibration.StartCalibration();   // マイクが変わると周囲の音量も変わるので測り直す
+        }
         UpdateTimbreCapture(keyboard.iKey.isPressed, keyboard.iKey.wasReleasedThisFrame, true);
         UpdateTimbreCapture(keyboard.oKey.isPressed, keyboard.oKey.wasReleasedThisFrame, false);
 
@@ -107,7 +111,7 @@ public class DebugPanel : MonoBehaviour
             if (calibration.IsCalibrating)
                 sb.AppendLine($"Calib  : measuring... {calibration.Progress * 100f:F0}%  (stay quiet)");
             else if (!float.IsNaN(calibration.LastAmbientDb))
-                sb.AppendLine($"Calib  : ambient {calibration.LastAmbientDb:F1} dB");
+                sb.AppendLine($"Calib  : ambient {calibration.LastAmbientDb:F1} dB  spread {calibration.LastSpreadDb:F1} dB  tries {calibration.LastAttempts}");
             else
                 sb.AppendLine("Calib  : not yet");
         }

@@ -9,7 +9,8 @@ using UnityEngine;
 ///
 /// 他のスクリプトへの通知:
 ///   OnStateChanged … 状態が変わったとき（MessageUI, AudioManager, WarpGate, WarpSequence, ResultUI など）
-///   OnHit          … 隕石に当たったとき（CameraShake, HitEffect, AudioManager など）
+///   OnHit          … 隕石に当たったとき（CameraShake, HitEffect, AudioManager など）。金の隕石では呼ばない
+///   OnMeteorHit    … 隕石に当たったとき、その種類（色）と一緒に（MeteorEffectUI など）。金の隕石でも呼ぶ
 /// </summary>
 public class GameManager : MonoBehaviour
 {
@@ -27,6 +28,18 @@ public class GameManager : MonoBehaviour
     [SerializeField, Range(0f, 1f)] float hitSlowdown = 0.3f;
     [Tooltip("隕石に当たってから、この秒数は加速できない（減速を感じやすくする）")]
     [SerializeField] float hitRecoveryTime = 1f;
+
+    [Header("色つき隕石（MeteorKind）")]
+    [Tooltip("赤：速度に掛ける倍率")]
+    [SerializeField, Range(0f, 1f)] float redSlowdown = 0.1f;
+    [Tooltip("赤：当たってから加速できない秒数")]
+    [SerializeField] float redRecoveryTime = 2f;
+    [Tooltip("金：ブースト中の速度（maxSpeed に掛ける倍率）")]
+    [SerializeField] float boostSpeedMultiplier = 1.5f;
+    [Tooltip("金：ブーストが続く秒数")]
+    [SerializeField] float boostTime = 1.5f;
+    [Tooltip("紫：左右の操作が逆になる秒数")]
+    [SerializeField] float reverseTime = 3f;
 
     [Header("進行")]
     [SerializeField] float goalDistance = 1500f;
@@ -54,11 +67,23 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public bool HoldSpeed { get; set; }
 
+    /// <summary>紫の隕石に当たって、左右の操作が逆になっているか（ShipMover が使う）。</summary>
+    public bool ControlsReversed => reverseTimer > 0f;
+
+    /// <summary>左右が逆になっている残り秒数。</summary>
+    public float ReverseTimeLeft => Mathf.Max(0f, reverseTimer);
+
+    /// <summary>金の隕石を取って、ブースト中か。</summary>
+    public bool IsBoosting => boostTimer > 0f;
+
     public event Action<GameState> OnStateChanged;
     public event Action OnHit;
+    public event Action<MeteorKind> OnMeteorHit;
 
     float startHoldTimer;
     float hitRecoveryTimer;
+    float boostTimer;
+    float reverseTimer;
 
     float Level => mic != null ? mic.Level : 0f;
 
@@ -96,10 +121,13 @@ public class GameManager : MonoBehaviour
     void UpdatePlaying()
     {
         if (hitRecoveryTimer > 0f) hitRecoveryTimer -= Time.deltaTime;
+        if (boostTimer > 0f) boostTimer -= Time.deltaTime;
+        if (reverseTimer > 0f) reverseTimer -= Time.deltaTime;
 
         if (!HoldSpeed)
         {
             float targetSpeed = Mathf.Lerp(minSpeed, maxSpeed, Level);
+            if (boostTimer > 0f) targetSpeed = maxSpeed * boostSpeedMultiplier;
             // 当たった直後は加速させない（声を小さくしたときの減速はそのまま）
             if (hitRecoveryTimer > 0f) targetSpeed = Mathf.Min(targetSpeed, Speed);
             Speed = Mathf.MoveTowards(Speed, targetSpeed, accel * Time.deltaTime);
@@ -122,18 +150,47 @@ public class GameManager : MonoBehaviour
         ElapsedTime = 0f;
         startHoldTimer = 0f;
         hitRecoveryTimer = 0f;
+        boostTimer = 0f;
+        reverseTimer = 0f;
         HoldSpeed = false;
         if (calibration != null) calibration.StartCalibration();
         SetState(GameState.Ready, force: true);
     }
 
-    /// <summary>隕石に当たったことを通知する。ShipCollision から呼ぶ。</summary>
-    public void NotifyHit()
+    /// <summary>隕石に当たったことを通知する。ShipCollision から呼ぶ。種類（色）によって作用が変わる。</summary>
+    public void NotifyHit(MeteorKind kind = MeteorKind.Normal)
     {
         if (State != GameState.Playing) return;
-        Speed *= hitSlowdown;
-        hitRecoveryTimer = hitRecoveryTime;
+
+        switch (kind)
+        {
+            case MeteorKind.Gold:
+                // ブースト：一気に加速し、当たった後の失速も消す。良い隕石なので OnHit（揺れ・衝突音）は出さない
+                boostTimer = boostTime;
+                hitRecoveryTimer = 0f;
+                Speed = Mathf.Max(Speed, maxSpeed * boostSpeedMultiplier);
+                OnMeteorHit?.Invoke(kind);
+                return;
+
+            case MeteorKind.Red:
+                Speed = Mathf.Max(minSpeed, Speed * redSlowdown);   // minSpeed より遅くはしない（止まって見えないように）
+                hitRecoveryTimer = redRecoveryTime;
+                boostTimer = 0f;
+                break;
+
+            case MeteorKind.Purple:
+                // 減速はせず、左右の操作だけ逆にする
+                reverseTimer = reverseTime;
+                break;
+
+            default:
+                Speed = Mathf.Max(minSpeed, Speed * hitSlowdown);
+                hitRecoveryTimer = hitRecoveryTime;
+                boostTimer = 0f;
+                break;
+        }
         OnHit?.Invoke();
+        OnMeteorHit?.Invoke(kind);
     }
 
     /// <summary>速度を毎秒 amountPerSecond ずつ下げる（minSpeed より下がらない）。SilentZone が毎フレーム呼ぶ。</summary>

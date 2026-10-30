@@ -83,6 +83,7 @@ public class ShipMover : MonoBehaviour
             case GameState.Playing:
                 float level = mic != null ? mic.Level : 0f;
                 float timbre = mic != null && moveHorizontally ? mic.Timbre : 0f;
+                if (gameManager.ControlsReversed) timbre = -timbre;   // 紫の隕石に当たると左右が逆になる
                 targetY = Mathf.Lerp(minY, maxY, level);
                 targetX = restX + timbre * rangeX;
                 break;

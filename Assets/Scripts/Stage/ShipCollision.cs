@@ -44,12 +44,10 @@ public class ShipCollision : MonoBehaviour
         if (Time.time - lastHitTime < invincibleTime) return;
         lastHitTime = Time.time;
 
-        if (gameManager != null) gameManager.NotifyHit();
+        // 隕石の種類（色）によって作用が変わるので、種類も一緒に伝える
+        var meteor = other.GetComponentInParent<Meteor>();
+        if (gameManager != null) gameManager.NotifyHit(meteor != null ? meteor.Kind : MeteorKind.Normal);
 
-        if (despawnMeteorOnHit)
-        {
-            var meteor = other.GetComponentInParent<Meteor>();
-            if (meteor != null) meteor.Despawn();
-        }
+        if (despawnMeteorOnHit && meteor != null) meteor.Despawn();
     }
 }

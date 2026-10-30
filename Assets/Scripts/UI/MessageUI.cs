@@ -9,8 +9,9 @@ public class MessageUI : MonoBehaviour
     [Header("GameManager参照")]
     [SerializeField] private GameManager gameManager;
 
-    //Ready中のメッセージ（2行目は操作説明。<size> で小さく表示する）
-    const string ReadyText = "声を出してスタート!!\n<size=55%>大きな声で上へ ・ 「いー」で右 ・ 「おー」で左</size>";
+    //Ready中のメッセージ（2行目は操作説明、3行目は色つき隕石の説明。<size> で小さく表示する）
+    const string ReadyText = "声を出してスタート!!\n<size=55%>大きな声で上へ ・ 「いー」で右 ・ 「おー」で左</size>"
+        + "\n<size=45%><color=#FFD040>金</color>=加速 ・ <color=#FF4D40>赤</color>=大減速 ・ <color=#CC73FF>紫</color>=左右反転</size>";
 
     bool wasCalibrating;
 
